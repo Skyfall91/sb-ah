@@ -1,6 +1,6 @@
 import aiohttp
 import statistics
-from typing import Any
+from typing import Any, Optional
 
 BASE = "https://sky.coflnet.com/api"
 TIMEOUT = aiohttp.ClientTimeout(total=10)
@@ -11,7 +11,7 @@ class NoDataError(Exception):
 
 
 class CoflnetClient:
-    async def _get(self, path: str, params: dict | None = None) -> Any:
+    async def _get(self, path: str, params: Optional[dict] = None) -> Any:
         async with aiohttp.ClientSession(timeout=TIMEOUT) as session:
             async with session.get(f"{BASE}{path}", params=params) as resp:
                 return await resp.json(content_type=None)
