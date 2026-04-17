@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 @dataclass
@@ -11,4 +11,4 @@ class Opportunity:
     action: str        # "JETZT KAUFEN" or "JETZT INVESTIEREN"
     details: dict
     confidence: str    # "high", "medium", "low"
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
