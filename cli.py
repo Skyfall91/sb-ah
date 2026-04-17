@@ -1,7 +1,7 @@
 import argparse
 import sys
 from rich.console import Console
-from rich.text import Text
+
 from config import load_config, setup_first_run
 from db import DB
 
