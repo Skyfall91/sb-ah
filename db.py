@@ -1,3 +1,4 @@
+from __future__ import annotations
 import sqlite3
 import json
 from datetime import datetime, timedelta, timezone
@@ -36,6 +37,8 @@ class DB:
                     recorded_at TEXT NOT NULL
                 )
             """)
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_opp_created_at ON opportunities(created_at)")
+            conn.execute("CREATE INDEX IF NOT EXISTS idx_snap_item_id ON price_snapshots(item_id)")
 
     def save_opportunity(self, opp: Opportunity):
         with self._conn() as conn:
@@ -46,7 +49,7 @@ class DB:
                  json.dumps(opp.details), opp.confidence, opp.created_at.isoformat())
             )
 
-    def get_opportunities(self, type_filter: str = None, min_profit: float = 0) -> list:
+    def get_opportunities(self, type_filter: str = None, min_profit: float = 0) -> list[Opportunity]:
         query = (
             "SELECT type, item_id, item_name, profit, action, details, confidence, created_at "
             "FROM opportunities WHERE profit >= ?"
@@ -79,7 +82,7 @@ class DB:
                 (item_id, price, source, datetime.now(timezone.utc).isoformat())
             )
 
-    def get_price_snapshots(self, item_id: str) -> list:
+    def get_price_snapshots(self, item_id: str) -> list[dict]:
         with self._conn() as conn:
             rows = conn.execute(
                 "SELECT price, source, recorded_at FROM price_snapshots WHERE item_id = ? ORDER BY recorded_at DESC",

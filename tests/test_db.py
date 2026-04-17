@@ -1,7 +1,7 @@
 import pytest
 import tempfile
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from models import Opportunity
 from db import DB
 
@@ -30,6 +30,7 @@ def test_save_and_load_opportunity(tmp_db):
     assert len(results) == 1
     assert results[0].item_id == "ENCHANTED_DIAMOND"
     assert results[0].profit == 2_300_000
+    assert results[0].details == {"buy_order": 18_200_000, "sell_offer": 20_500_000}
 
 
 def test_filter_by_type(tmp_db):
@@ -55,6 +56,18 @@ def test_clear_old_opportunities(tmp_db):
     tmp_db.save_opportunity(opp)
     tmp_db.clear_opportunities_older_than_minutes(0)
     assert tmp_db.get_opportunities() == []
+
+
+def test_clear_old_opportunities_keeps_recent(tmp_db):
+    old_opp = Opportunity("BAZAAR", "OLD", "Old", 600_000, "JETZT KAUFEN", {}, "high")
+    old_opp.created_at = datetime.now(timezone.utc) - timedelta(minutes=10)
+    recent_opp = Opportunity("BAZAAR", "NEW", "New", 600_000, "JETZT KAUFEN", {}, "high")
+    tmp_db.save_opportunity(old_opp)
+    tmp_db.save_opportunity(recent_opp)
+    tmp_db.clear_opportunities_older_than_minutes(5)
+    results = tmp_db.get_opportunities()
+    assert len(results) == 1
+    assert results[0].item_id == "NEW"
 
 
 def test_save_price_snapshot(tmp_db):
