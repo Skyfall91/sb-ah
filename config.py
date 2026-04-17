@@ -20,9 +20,12 @@ def load_config(path: str = DEFAULT_CONFIG_PATH) -> Config:
         return Config(**{k: v for k, v in data.items() if k in Config.__dataclass_fields__})
     except FileNotFoundError:
         return Config()
+    except yaml.YAMLError as e:
+        print(f"[warn] config.yaml is malformed ({e}), using defaults")
+        return Config()
 
 
-def save_config(cfg: Config, path: str = DEFAULT_CONFIG_PATH):
+def save_config(cfg: Config, path: str = DEFAULT_CONFIG_PATH) -> None:
     with open(path, "w") as f:
         yaml.dump(asdict(cfg), f, default_flow_style=False)
 
@@ -37,6 +40,9 @@ def setup_first_run(path: str = DEFAULT_CONFIG_PATH) -> Config:
     tax_choice = input("Bazaar tax rate (0.0125 or lower, e.g. 0.009): ").strip()
     try:
         bazaar_tax = float(tax_choice)
+        if not (0.0 <= bazaar_tax <= 0.0125):
+            print("  Invalid range, using default 1.25%")
+            bazaar_tax = 0.0125
     except ValueError:
         bazaar_tax = 0.0125
 

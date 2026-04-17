@@ -29,3 +29,12 @@ def test_load_missing_file_returns_defaults(tmp_path):
     path = str(tmp_path / "nonexistent.yaml")
     cfg = load_config(path)
     assert cfg.bazaar_tax == 0.0125
+
+
+def test_load_malformed_yaml_returns_defaults(tmp_path):
+    path = str(tmp_path / "bad.yaml")
+    path_obj = tmp_path / "bad.yaml"
+    path_obj.write_text(": invalid: yaml: {{{{")
+    cfg = load_config(str(path_obj))
+    assert cfg.bazaar_tax == 0.0125
+    assert cfg.api_key == ""
