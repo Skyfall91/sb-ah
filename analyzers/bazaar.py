@@ -1,3 +1,4 @@
+from __future__ import annotations
 from models import Opportunity
 
 MIN_WEEKLY_VOLUME = 50_000
@@ -8,7 +9,7 @@ class BazaarAnalyzer:
         self.bazaar_tax = bazaar_tax
         self.min_profit = min_profit
 
-    def analyze(self, products: dict, items_meta: dict) -> list:
+    def analyze(self, products: dict, items_meta: dict) -> list[Opportunity]:
         opportunities = []
         for item_id, product in products.items():
             if not product.get("sell_summary") or not product.get("buy_summary"):
