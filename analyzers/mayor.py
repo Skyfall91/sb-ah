@@ -41,8 +41,8 @@ class MayorAnalyzer:
             cycle_prices = prices[cycle.start_day:cycle.end_day + 1]
             if not cycle_prices:
                 continue
-            cycle_peak = max(cycle_prices)
-            pct_increase = ((cycle_peak - overall_avg) / overall_avg) * 100
+            cycle_avg = statistics.mean(cycle_prices)
+            pct_increase = ((cycle_avg - overall_avg) / overall_avg) * 100
             cycle_increases.append(pct_increase)
 
         if len(cycle_increases) < self.min_cycles:

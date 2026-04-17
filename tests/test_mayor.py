@@ -18,7 +18,8 @@ def analyzer():
 
 
 def test_item_with_strong_diana_correlation_detected(analyzer):
-    history = make_history(base=80_000, spikes_at=list(range(0, 93, 31)), spike_mult=3.0, days=180)
+    # Spikes cover all days within the three cycle windows (0-92)
+    history = make_history(base=200_000, spikes_at=list(range(0, 93)), spike_mult=5.0, days=180)
     cycles = [
         MayorCycle(mayor="Diana", start_day=0, end_day=30),
         MayorCycle(mayor="Diana", start_day=31, end_day=61),
@@ -30,7 +31,7 @@ def test_item_with_strong_diana_correlation_detected(analyzer):
 
 
 def test_item_with_insufficient_cycles_returns_none(analyzer):
-    history = make_history(base=80_000, spikes_at=[0, 31], spike_mult=2.0, days=180)
+    history = make_history(base=80_000, spikes_at=list(range(0, 62)), spike_mult=2.0, days=180)
     cycles = [
         MayorCycle(mayor="Diana", start_day=0, end_day=30),
         MayorCycle(mayor="Diana", start_day=31, end_day=61),
@@ -51,7 +52,7 @@ def test_item_with_weak_correlation_ignored(analyzer):
 
 
 def test_wrong_mayor_not_reported(analyzer):
-    history = make_history(base=80_000, spikes_at=list(range(0, 93, 31)), spike_mult=3.0, days=180)
+    history = make_history(base=200_000, spikes_at=list(range(0, 93)), spike_mult=5.0, days=180)
     cycles = [
         MayorCycle(mayor="Diana", start_day=0, end_day=30),
         MayorCycle(mayor="Diana", start_day=31, end_day=61),
