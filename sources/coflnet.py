@@ -11,7 +11,7 @@ class NoDataError(Exception):
 
 
 class CoflnetClient:
-    async def _get(self, path: str, params: dict = None) -> Any:
+    async def _get(self, path: str, params: dict | None = None) -> Any:
         async with aiohttp.ClientSession(timeout=TIMEOUT) as session:
             async with session.get(f"{BASE}{path}", params=params) as resp:
                 return await resp.json(content_type=None)
