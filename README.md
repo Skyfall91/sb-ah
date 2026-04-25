@@ -8,7 +8,7 @@ The tool detects listings where a bundle of items is cheaper per unit than singl
 
 - Python 3.10+
 - Free Hypixel API key: https://developer.hypixel.net/dashboard
-- For the AI advisor: [LM Studio](https://lmstudio.ai) with `qwen3.6:35b-a3b` loaded
+- For the AI advisor: [LM Studio](https://lmstudio.ai) with `Qwen3-8B` (MLX 4-bit) loaded
 
 ## Setup
 
@@ -68,7 +68,7 @@ python3 cli.py advice
 python3 cli.py advice --full
 ```
 
-Requires LM Studio running locally with `qwen3.6:35b-a3b` loaded. Default URL: `http://localhost:1234`.
+Requires LM Studio running locally with `Qwen3-8B` (MLX 4-bit) loaded. Default URL: `http://localhost:1234`.
 
 ## Reading the output
 

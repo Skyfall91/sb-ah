@@ -11,7 +11,7 @@ from sources import rag
 from utils.formatting import format_coins
 
 CORE_MECHANICS_PATH = os.path.join(os.path.dirname(__file__), "data", "core_mechanics.md")
-ADVISOR_MODEL = "qwen3.6:35b-a3b"
+ADVISOR_MODEL = "qwen3-8b"
 
 
 def _load_core_mechanics() -> str:
