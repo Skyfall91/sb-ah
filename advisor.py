@@ -156,7 +156,7 @@ def run(cfg: Config, full: bool = False) -> None:
 
     if rag.index_exists():
         query = " ".join(set(o.item_name for o in opportunities[:10]))
-        wiki_chunks = rag.retrieve(query, k=8)
+        wiki_chunks = rag.retrieve(query, k=2)
     else:
         wiki_chunks = []
 
@@ -168,6 +168,17 @@ def run(cfg: Config, full: bool = False) -> None:
         return
 
     core_mechanics = _load_core_mechanics()
+    # Keep only AH + Mayor sections to stay within small model context windows
+    relevant = []
+    keep = False
+    for line in core_mechanics.splitlines():
+        if line.startswith("## ") and line not in ("## Auction House (AH)", "## Mayor System", "## Bazaar", "## Coins & Wealth"):
+            keep = False
+        if line in ("## Auction House (AH)", "## Mayor System", "## Bazaar", "## Coins & Wealth"):
+            keep = True
+        if keep:
+            relevant.append(line)
+    core_mechanics = "\n".join(relevant)
     prompt = _build_prompt(wealth, opportunities, wiki_chunks, core_mechanics, full)
 
     client = OpenAI(base_url=f"{cfg.lm_studio_url}/v1", api_key="lm-studio")
