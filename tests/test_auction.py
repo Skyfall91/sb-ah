@@ -1,95 +1,53 @@
 import pytest
+from unittest.mock import patch
 from analyzers.auction import AuctionAnalyzer
 
-MEDIAN_PRICES = {
-    "ASPECT_OF_THE_END": 25_000_000,
-    "SAND": 500,
-}
+END = 9_999_999_999_999
+LBIN = {"ITEM": 1_000_000}
+
+
+def auction(bid, *, bin=True, claimed=False):
+    return {"item_bytes": "fake", "starting_bid": bid, "bin": bin, "claimed": claimed, "end": END}
 
 
 @pytest.fixture
 def analyzer():
-    return AuctionAnalyzer(min_profit=500_000, underpriced_threshold=0.25)
+    return AuctionAnalyzer(min_profit=500_000)
 
 
-def test_underpriced_item_detected(analyzer):
-    auctions = [
-        {
-            "item_name": "Aspect of the End",
-            "tag": "ASPECT_OF_THE_END",
-            "starting_bid": 18_000_000,
-            "bin": True,
-            "claimed": False,
-            "end": 9999999999999,
-            "count": 1,
-        }
-    ]
-    # 18M vs 25M median → 28% below → profit 7M
-    results = analyzer.analyze(auctions, MEDIAN_PRICES)
-    assert any(r.item_id == "ASPECT_OF_THE_END" for r in results)
+def test_bundle_arbitrage_detected(analyzer):
+    # single at 1M, bundle of 64 at 1000 total → profit per 14 >> 500k
+    auctions = [auction(1_000_000), auction(1_000)]
+    with patch("analyzers.auction.decode_auction_item", side_effect=[(1, "ITEM"), (64, "ITEM")]):
+        results = analyzer.analyze(auctions, LBIN)
+    assert any(r.item_id == "ITEM" for r in results)
 
 
-def test_fairly_priced_item_ignored(analyzer):
-    auctions = [
-        {
-            "item_name": "Aspect of the End",
-            "tag": "ASPECT_OF_THE_END",
-            "starting_bid": 24_000_000,
-            "bin": True,
-            "claimed": False,
-            "end": 9999999999999,
-            "count": 1,
-        }
-    ]
-    results = analyzer.analyze(auctions, MEDIAN_PRICES)
+def test_bundle_near_reference_price_ignored(analyzer):
+    # bundle barely below reference → profit_14 < min_profit
+    auctions = [auction(1_000_000), auction(985_000 * 64)]
+    with patch("analyzers.auction.decode_auction_item", side_effect=[(1, "ITEM"), (64, "ITEM")]):
+        results = analyzer.analyze(auctions, LBIN)
     assert results == []
-
-
-def test_stack_arbitrage_detected(analyzer):
-    auctions = [
-        {
-            "item_name": "Sand",
-            "tag": "SAND",
-            "starting_bid": 5_000,
-            "bin": True,
-            "claimed": False,
-            "end": 9999999999999,
-            "count": 64,
-        }
-    ]
-    high_median = {"SAND": 20_000}
-    results = analyzer.analyze(auctions, high_median)
-    # price_per_unit = 5000/64 ≈ 78, median=20000, profit = (20000-78)*64 ≈ 1.27M > 500k
-    assert any(r.item_id == "SAND" for r in results)
 
 
 def test_non_bin_auction_skipped(analyzer):
-    auctions = [
-        {
-            "item_name": "Aspect of the End",
-            "tag": "ASPECT_OF_THE_END",
-            "starting_bid": 10_000_000,
-            "bin": False,
-            "claimed": False,
-            "end": 9999999999999,
-            "count": 1,
-        }
-    ]
-    results = analyzer.analyze(auctions, MEDIAN_PRICES)
+    # non-BIN is ignored, leaving only the single → no bundle → no result
+    auctions = [auction(1_000_000), auction(1_000, bin=False)]
+    with patch("analyzers.auction.decode_auction_item", side_effect=[(1, "ITEM")]):
+        results = analyzer.analyze(auctions, LBIN)
     assert results == []
 
 
-def test_no_median_data_skipped(analyzer):
-    auctions = [
-        {
-            "item_name": "Unknown",
-            "tag": "UNKNOWN_ITEM",
-            "starting_bid": 1_000,
-            "bin": True,
-            "claimed": False,
-            "end": 9999999999999,
-            "count": 1,
-        }
-    ]
-    results = analyzer.analyze(auctions, MEDIAN_PRICES)
+def test_no_item_bytes_skipped(analyzer):
+    auctions = [{"starting_bid": 1_000, "bin": True, "claimed": False, "end": END}]
+    results = analyzer.analyze(auctions, LBIN)
+    assert results == []
+
+
+def test_unknown_item_without_lbin_skipped(analyzer):
+    # no avg_lbin entry, only one auction → can't form singles+bundles pair
+    auctions = [auction(1_000)]
+    with patch("analyzers.auction.decode_auction_item", side_effect=[(64, "UNKNOWN")]):
+        results = analyzer.analyze(auctions, {})
     assert results == []

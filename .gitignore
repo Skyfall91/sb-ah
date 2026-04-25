@@ -1,0 +1,24 @@
+# Config with secrets
+config.yaml
+
+# Database
+skyblock.db
+
+# Logs
+*.log
+
+# Caches
+.neu_cache/
+.icon_cache/
+.moulberry_lbin.json
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# App bundle (built artifact)
+Skyblock.app/

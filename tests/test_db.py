@@ -70,6 +70,38 @@ def test_clear_old_opportunities_keeps_recent(tmp_db):
     assert results[0].item_id == "NEW"
 
 
+def test_top_sightings_include_prices(tmp_db):
+    opp = Opportunity("AH", "ITEM", "Item", 1_000_000, "JETZT KAUFEN",
+                      {"tier": "RARE", "bundle_per_unit": 5_000, "single_price": 25_000_000}, "high")
+    tmp_db.record_sightings([opp])
+    rows = tmp_db.get_top_sightings(hours=1)
+    assert len(rows) == 1
+    assert rows[0]["avg_buy_price"] == 5_000
+    assert rows[0]["avg_sell_price"] == 25_000_000
+
+
+def test_sightings_kept_for_30_days(tmp_db):
+    opp = Opportunity("AH", "ITEM", "Item", 1_000_000, "JETZT KAUFEN", {"tier": "RARE"}, "high")
+    # Record a sighting, then manually backdate it to 29 days ago
+    tmp_db.record_sightings([opp])
+    with tmp_db._conn() as conn:
+        conn.execute("UPDATE ah_sightings SET seen_at = datetime('now', '-29 days')")
+    # After another record_sightings call (which prunes), 29-day-old entry should survive
+    tmp_db.record_sightings([])
+    rows = tmp_db.get_top_sightings(hours=24 * 30)
+    assert len(rows) == 1
+
+
+def test_sightings_older_than_30_days_pruned(tmp_db):
+    opp = Opportunity("AH", "ITEM", "Item", 1_000_000, "JETZT KAUFEN", {"tier": "RARE"}, "high")
+    tmp_db.record_sightings([opp])
+    with tmp_db._conn() as conn:
+        conn.execute("UPDATE ah_sightings SET seen_at = datetime('now', '-31 days')")
+    tmp_db.record_sightings([])
+    rows = tmp_db.get_top_sightings(hours=24 * 32)
+    assert len(rows) == 0
+
+
 def test_save_price_snapshot(tmp_db):
     tmp_db.save_price_snapshot("ENCHANTED_DIAMOND", 80_000.0, "self")
     snapshots = tmp_db.get_price_snapshots("ENCHANTED_DIAMOND")

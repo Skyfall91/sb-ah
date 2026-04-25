@@ -1,0 +1,5 @@
+api_key: YOUR_HYPIXEL_API_KEY
+bazaar_tax: 0.0
+min_profit_display: 100000
+min_profit_notify: 500000
+npc_discount: 0.02

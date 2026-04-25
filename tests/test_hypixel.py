@@ -1,5 +1,4 @@
 import pytest
-import pytest_asyncio
 from unittest.mock import AsyncMock, patch, MagicMock
 from sources.hypixel import HypixelClient
 
