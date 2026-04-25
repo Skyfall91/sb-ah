@@ -11,7 +11,6 @@ from sources import rag
 from utils.formatting import format_coins
 
 CORE_MECHANICS_PATH = os.path.join(os.path.dirname(__file__), "data", "core_mechanics.md")
-ADVISOR_MODEL = "qwen3.6:35b-a3b"
 
 
 def _load_core_mechanics() -> str:
@@ -163,10 +162,12 @@ def run(cfg: Config, full: bool = False) -> None:
     core_mechanics = _load_core_mechanics()
     prompt = _build_prompt(wealth, opportunities, wiki_chunks, core_mechanics, full)
 
-    print(f"Asking {ADVISOR_MODEL}...\n")
     client = OpenAI(base_url=f"{cfg.lm_studio_url}/v1", api_key="lm-studio")
+    models = client.models.list()
+    model_id = models.data[0].id if models.data else "local-model"
+    print(f"Asking {model_id}...\n")
     response = client.chat.completions.create(
-        model=ADVISOR_MODEL,
+        model=model_id,
         messages=[{"role": "user", "content": prompt}],
         temperature=0.3,
         stream=True,
