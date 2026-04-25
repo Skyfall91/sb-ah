@@ -1,34 +1,40 @@
-# Skyblock Investment Tool
+# Skyblock AH Flipper
 
-Findet automatisch profitable Investitionsmöglichkeiten in Hypixel Skyblock.
+Findet automatisch profitable Flip-Möglichkeiten im Hypixel Skyblock Auction House.
 
 ## Einrichtung (einmalig)
 
 ```bash
 pip3 install -r requirements.txt
-python3 cli.py setup
+cp config.yaml.example config.yaml
+python3 cli.py setup   # fragt nach deinem API-Key
 ```
+
+API-Key bekommst du hier: https://developer.hypixel.net/dashboard
 
 ## Starten
 
-Doppelklick auf **`start.command`** im Finder.
-
-Oder im Terminal:
+**Daemon starten** (holt alle 60s neue Daten):
 ```bash
-python3 menubar.py
+python3 cli.py daemon start
 ```
 
-Das Tool erscheint in der macOS Menüleiste:
-- `● SB` — läuft, Opportunities vorhanden
-- `○ SB` — läuft, keine Opportunities gerade
-- `✕ SB` — Daemon gestoppt
-
-## Menü
-
-Klick auf ein Item kopiert den Namen in die Zwischenablage (direkt im Spiel einfügbar).
-
-## Daemon-Log
-
+**Opportunities anzeigen:**
 ```bash
-tail -f daemon.log
+python3 cli.py
+```
+
+**Live-Ansicht** (aktualisiert alle 10s):
+```bash
+python3 cli.py -w
+```
+
+**Top-Flips der letzten 24h:**
+```bash
+python3 cli.py top
+```
+
+**Daemon stoppen:**
+```bash
+python3 cli.py daemon stop
 ```
