@@ -2,6 +2,8 @@
 from __future__ import annotations
 import os
 
+os.environ.setdefault("HF_HUB_VERBOSITY", "error")
+
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "chroma_db")
 
 
