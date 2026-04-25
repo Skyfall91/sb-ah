@@ -31,32 +31,20 @@ def save_config(cfg: Config, path: str = DEFAULT_CONFIG_PATH) -> None:
 
 
 def setup_first_run(path: str = DEFAULT_CONFIG_PATH) -> Config:
-    print("=== Skyblock Investment Tool — First Run Setup ===\n")
-    api_key = input("Hypixel API Key (https://developer.hypixel.net): ").strip()
+    print("=== Skyblock Investment Tool ===\n")
+    print("Kein API-Key gefunden. Du brauchst einen kostenlosen Hypixel API-Key:")
+    print("  → https://developer.hypixel.net/dashboard\n")
+    print("1. Einloggen mit deinem Minecraft-Account")
+    print("2. 'Create API Key' klicken")
+    print("3. Key hier einfügen:\n")
 
-    print("\nBazaar Tax Rate:")
-    print("  0 = 1.25% (default, no upgrades)")
-    print("  1 = lower (Community Shop upgraded)")
-    tax_choice = input("Bazaar tax rate (0.0125 or lower, e.g. 0.009): ").strip()
-    try:
-        bazaar_tax = float(tax_choice)
-        if not (0.0 <= bazaar_tax <= 0.0125):
-            print("  Invalid range, using default 1.25%")
-            bazaar_tax = 0.0125
-    except ValueError:
-        bazaar_tax = 0.0125
+    while True:
+        api_key = input("API Key: ").strip()
+        if api_key:
+            break
+        print("  Bitte einen Key eingeben.")
 
-    print("\nNPC Discount Talisman:")
-    print("  0 = none, 1 = 1%, 2 = 2%, 3 = 3%")
-    disc_choice = input("NPC discount level (0/1/2/3): ").strip()
-    discount_map = {"0": 0.0, "1": 0.01, "2": 0.02, "3": 0.03}
-    npc_discount = discount_map.get(disc_choice, 0.0)
-
-    cfg = Config(
-        api_key=api_key,
-        bazaar_tax=bazaar_tax,
-        npc_discount=npc_discount,
-    )
+    cfg = Config(api_key=api_key)
     save_config(cfg, path)
-    print(f"\nConfig saved to {path}\n")
+    print(f"\nGespeichert. Starte neu um fortzufahren.\n")
     return cfg
