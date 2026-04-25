@@ -5,8 +5,16 @@ from collections import defaultdict
 from models import Opportunity
 from utils.nbt import decode_auction_item
 
-# Hypixel BIN listing fee: 1% of listing price, deducted from seller's payout
-AH_FEE = 0.01
+def _ah_fee(sell_price: float, derpy: bool = False) -> float:
+    """Total BIN fee: tiered listing fee + claiming fee (1% over 1M, 4x during Derpy)."""
+    if sell_price > 100_000_000:
+        listing = 0.025
+    elif sell_price > 10_000_000:
+        listing = 0.02
+    else:
+        listing = 0.01
+    claiming = (0.04 if derpy else 0.01) if sell_price > 1_000_000 else 0.0
+    return listing + claiming
 
 # Categories from the Hypixel items API that are gameplay-relevant
 USEFUL_CATEGORIES = {
@@ -39,6 +47,7 @@ class AuctionAnalyzer:
         item_categories: dict[str, str] | None = None,
         bazaar: dict | None = None,
         item_npc_prices: dict[str, float] | None = None,
+        derpy: bool = False,
     ) -> list[Opportunity]:
         now_ms = int(time.time() * 1000)
         avg_lbin = avg_lbin or {}
@@ -117,8 +126,9 @@ class AuctionAnalyzer:
                 suspicious = False
 
             profitable = []
+            fee = _ah_fee(reference_price, derpy=derpy)
             for bundle in bundles:
-                sell_revenue = reference_price * bundle["count"] * (1 - AH_FEE)
+                sell_revenue = reference_price * bundle["count"] * (1 - fee)
                 profit = sell_revenue - bundle["total_price"]
                 profit_14 = (profit / bundle["count"]) * 14
                 if profit_14 >= self.min_profit:
@@ -134,7 +144,7 @@ class AuctionAnalyzer:
                 item_id=skyblock_id,
                 item_name=best_bundle["item_name"],
                 profit=profit_per_14,
-                action="JETZT KAUFEN",
+                action="BUY NOW",
                 details={
                     "count": best_bundle["count"],
                     "bundle_total": best_bundle["total_price"],

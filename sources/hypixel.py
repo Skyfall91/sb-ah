@@ -40,3 +40,7 @@ class HypixelClient:
         data = await self._get("/resources/skyblock/items")
         return data["items"]
 
+    async def get_mayor(self) -> str:
+        data = await self._get("/resources/skyblock/election")
+        return data.get("mayor", {}).get("name", "")
+

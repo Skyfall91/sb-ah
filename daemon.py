@@ -15,12 +15,16 @@ async def run_auction_loop(cfg, db: DB, hypixel: HypixelClient):
     loop = asyncio.get_running_loop()
     while True:
         try:
-            auctions, avg_lbin, items_raw, bazaar = await asyncio.gather(
+            auctions, avg_lbin, items_raw, bazaar, mayor = await asyncio.gather(
                 hypixel.get_auctions(),
                 loop.run_in_executor(None, moulberry.get_avg_lbin),
                 hypixel.get_items(),
                 hypixel.get_bazaar(),
+                hypixel.get_mayor(),
             )
+            derpy = mayor == "Derpy"
+            if derpy:
+                log.info("Mayor: Derpy — AH claiming fee is 4x")
             item_categories = {}
             item_npc_prices = {}
             for item in items_raw:
@@ -34,13 +38,14 @@ async def run_auction_loop(cfg, db: DB, hypixel: HypixelClient):
                 item_categories=item_categories,
                 bazaar=bazaar,
                 item_npc_prices=item_npc_prices,
+                derpy=derpy,
             )
             db.clear_opportunities_older_than_minutes(10, type_filter="AH")
             for opp in ah_opps:
                 db.save_opportunity(opp)
             db.record_sightings(ah_opps)
             lbin_hits = sum(1 for o in ah_opps if o.details.get("has_lbin"))
-            log.info(f"AH: {len(ah_opps)} opportunities ({lbin_hits} mit LBIN, {len(avg_lbin)} Preise geladen)")
+            log.info(f"AH: {len(ah_opps)} opportunities ({lbin_hits} with LBIN, {len(avg_lbin)} prices loaded, mayor: {mayor})")
         except Exception as e:
             log.warning(f"Poll loop error: {e}")
         await asyncio.sleep(60)
