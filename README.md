@@ -1,6 +1,13 @@
 # Skyblock AH Flipper
 
-Finds profitable bundle flips in the Hypixel Skyblock Auction House — buy bundles cheap, sell singles for more.
+Automatically finds profitable bundle flips in the Hypixel Skyblock Auction House.
+
+The tool detects listings where a bundle of items is cheaper per unit than singles — buy the bundle, sell individually for profit.
+
+## Requirements
+
+- Python 3.10+
+- Free Hypixel API key: https://developer.hypixel.net/dashboard
 
 ## Setup
 
@@ -11,23 +18,43 @@ pip3 install -r requirements.txt
 python3 cli.py setup
 ```
 
-You'll need a free Hypixel API key: https://developer.hypixel.net/dashboard
+During setup you'll be asked for your API key. It's stored locally in `config.yaml` and never uploaded.
 
 ## Usage
 
+**Start the daemon** — fetches new auction data every 60 seconds:
 ```bash
-python3 cli.py daemon start   # start fetching data (every 60s)
-python3 cli.py                # show current flips
-python3 cli.py top            # best flips of the last 24h
-python3 cli.py daemon stop    # stop the daemon
+python3 cli.py daemon start
 ```
 
-## Columns
+**Show current flips:**
+```bash
+python3 cli.py
+```
 
-| | |
-|---|---|
+**Top flips over the last 24h** (more reliable, based on repeated sightings):
+```bash
+python3 cli.py top
+python3 cli.py top --hours 6
+```
+
+**Filter by minimum profit:**
+```bash
+python3 cli.py --min-profit 1m
+```
+
+**Stop the daemon:**
+```bash
+python3 cli.py daemon stop
+```
+
+## Reading the output
+
+| Column | Meaning |
+|--------|---------|
 | **Buy** | Bundle price per unit |
-| **Sell** | Reference price per unit (AH / Bazaar / NPC) |
-| **Profit/14** | Profit if you fill all 14 AH slots from one bundle |
+| **Sell** | Reference sell price (AH average, Bazaar, or NPC) |
+| **Bundles** | Number of profitable listings currently available |
+| **Profit/14** | Profit if you fill all 14 AH slots with singles from one bundle |
 
-`~` = price may be manipulated · `⚠` = suspiciously high price
+Price badges: `BZ` = Bazaar floor · `NPC` = NPC price · `~` = possible manipulation · `⚠` = suspicious price
