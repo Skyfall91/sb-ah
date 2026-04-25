@@ -59,7 +59,7 @@ class HypixelClient:
         return data[0]["id"]
 
     async def get_profile(self, uuid: str) -> dict[str, Any]:
-        data = await self._get("/skyblock/profiles", {"uuid": uuid})
+        data = await self._get("/v2/skyblock/profiles", {"uuid": uuid})
         profiles = data.get("profiles") or []
         # Use the most recently played profile
         active = max(profiles, key=lambda p: p.get("last_save", 0), default=None)
