@@ -65,5 +65,6 @@ python3 cli.py daemon stop  # stop the daemon
 
 1. Download [LM Studio](https://lmstudio.ai)
 2. Search for `Qwen3.5-9B-MLX-4bit` and download it (~5.6 GB, fits on 16 GB RAM)
-3. Go to **Local Server** and click **Start Server**
-4. Default URL `http://localhost:1234` is used automatically — no config needed
+3. Load the model and set **Context Length to at least 8192** (recommended: 24576) — the default is too small and will cause an error
+4. Go to **Local Server** and click **Start Server**
+5. Default URL `http://localhost:1234` is used automatically — no config needed
