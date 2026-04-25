@@ -1,10 +1,13 @@
+import ssl
 import aiohttp
 import asyncio
+import certifi
 from typing import Any
 
 BASE = "https://api.hypixel.net"
 MOJANG_BASE = "https://api.minecraftservices.com"
 TIMEOUT = aiohttp.ClientTimeout(total=10)
+_SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 
 class HypixelClient:
@@ -13,7 +16,7 @@ class HypixelClient:
 
     async def _get(self, path: str, params: dict = None) -> dict[str, Any]:
         p = {"key": self.api_key, **(params or {})}
-        async with aiohttp.ClientSession(timeout=TIMEOUT) as session:
+        async with aiohttp.ClientSession(timeout=TIMEOUT, connector=aiohttp.TCPConnector(ssl=_SSL_CTX)) as session:
             async with session.get(f"{BASE}{path}", params=p) as resp:
                 data = await resp.json()
         if not data.get("success"):
@@ -48,7 +51,7 @@ class HypixelClient:
     @staticmethod
     async def get_uuid(username: str) -> str:
         url = f"{MOJANG_BASE}/minecraft/profile/lookup/bulk/byname"
-        async with aiohttp.ClientSession(timeout=TIMEOUT) as session:
+        async with aiohttp.ClientSession(timeout=TIMEOUT, connector=aiohttp.TCPConnector(ssl=_SSL_CTX)) as session:
             async with session.post(url, json=[username]) as resp:
                 data = await resp.json()
         if not data:
