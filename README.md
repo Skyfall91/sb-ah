@@ -92,7 +92,7 @@ python3 cli.py daemon stop
 | **Buy** | Bundle quantity × price per unit |
 | **Sell** | Reference sell price per unit |
 | **Bundles** | Number of profitable listings currently available |
-| **Profit/14** | Estimated profit buying and reselling 1 bundle per day for 14 days |
+| **Profit/14** | Estimated profit if you fill all 14 AH slots with singles from one bundle |
 
 #### Price indicators
 
