@@ -108,28 +108,21 @@ def _build_prompt(wealth: dict, opportunities: list, wiki_chunks: list[str],
 
     wiki_section = "\n\n".join(wiki_chunks) if wiki_chunks else "(no wiki context loaded)"
 
-    return f"""You are an expert Hypixel Skyblock economy advisor. Your job is to give personalized, actionable flip recommendations based on the player's current wealth and the available AH opportunities.
+    return f"""You are a Hypixel Skyblock AH flip advisor. Give short, direct advice — no intros, no headers, no markdown, no filler. Max 120 words.
 
-## Core Game Mechanics
+Game mechanics reference:
 {core_mechanics}
 
-## Relevant Wiki Context
+Relevant wiki context:
 {wiki_section}
 
-## Player Wealth
+Player wealth:
 {chr(10).join(wealth_lines)}
 
-## Current AH Opportunities (sorted by profit/14 slots)
-{chr(10).join(opp_lines) if opp_lines else "No opportunities available — daemon may not be running."}
+Current AH opportunities (sorted by profit/14 slots):
+{chr(10).join(opp_lines) if opp_lines else "No opportunities — daemon not running."}
 
-## Your Task
-Analyze the opportunities above and give the player specific, prioritized recommendations. Consider:
-- Which flips they can actually afford given their liquid coins
-- Which items have the best risk/reward (flag manipulated or suspicious ones)
-- How many slots to dedicate to each flip
-- Any game knowledge that affects whether an item is a good flip right now (e.g. upcoming events, mayor effects, item usefulness)
-
-Be direct and specific. Format your answer clearly with the top 3-5 recommendations first, then any caveats."""
+Task: If opportunities exist, name the top 3 flips to prioritize given the player's liquid coins. For each: item, how many bundles to buy, why. Flag anything manipulated or suspicious. If no opportunities, say so in one sentence and suggest starting the daemon."""
 
 
 def run(cfg: Config, full: bool = False) -> None:

@@ -61,8 +61,10 @@ class HypixelClient:
     async def get_profile(self, uuid: str) -> dict[str, Any]:
         data = await self._get("/v2/skyblock/profiles", {"uuid": uuid})
         profiles = data.get("profiles") or []
-        # Use the most recently played profile
-        active = max(profiles, key=lambda p: p.get("last_save", 0), default=None)
+        # v2 uses selected=True for the active profile; fall back to last_save
+        active = next((p for p in profiles if p.get("selected")), None)
+        if not active:
+            active = max(profiles, key=lambda p: p.get("last_save", 0), default=None)
         if not active:
             raise ValueError("No Skyblock profile found")
         member = active.get("members", {}).get(uuid, {})
