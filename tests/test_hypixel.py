@@ -43,20 +43,3 @@ async def test_get_bazaar_timeout_raises(client):
             await client.get_bazaar()
 
 
-@pytest.mark.asyncio
-async def test_get_election_returns_mayor(client):
-    mock_response = {
-        "success": True,
-        "mayor": {"name": "Diana", "key": "diana", "perks": []},
-        "current": {"year": 360, "candidates": []}
-    }
-    with patch("aiohttp.ClientSession.get") as mock_get:
-        mock_ctx = MagicMock()
-        mock_ctx.__aenter__ = AsyncMock(return_value=MagicMock(
-            json=AsyncMock(return_value=mock_response),
-            status=200
-        ))
-        mock_ctx.__aexit__ = AsyncMock(return_value=False)
-        mock_get.return_value = mock_ctx
-        result = await client.get_election()
-    assert result["mayor"]["name"] == "Diana"

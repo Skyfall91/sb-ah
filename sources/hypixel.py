@@ -40,5 +40,3 @@ class HypixelClient:
         data = await self._get("/resources/skyblock/items")
         return data["items"]
 
-    async def get_election(self) -> dict[str, Any]:
-        return await self._get("/resources/skyblock/election")

@@ -7,8 +7,6 @@ DEFAULT_CONFIG_PATH = "config.yaml"
 @dataclass
 class Config:
     api_key: str = ""
-    bazaar_tax: float = 0.0125
-    npc_discount: float = 0.0
     min_profit_notify: int = 500_000
     min_profit_display: int = 100_000
 

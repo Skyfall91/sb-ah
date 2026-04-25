@@ -4,7 +4,7 @@ import sys
 import time
 from datetime import datetime
 
-from rich.console import Console, Group
+from rich.console import Console
 from rich.live import Live
 from rich.text import Text
 from rich.panel import Panel
@@ -84,62 +84,19 @@ def build_table(opps) -> Table:
     return table
 
 
-def load_opps(db, cfg, args):
-    type_filter = args.type.upper() if args.type else None
-    min_profit = cfg.min_profit_display
-    if args.min_profit:
-        raw = args.min_profit.lower().replace("m", "000000").replace("k", "000")
-        try:
-            min_profit = int(raw)
-        except ValueError:
-            console.print(f"[red]Ungültiger --min-profit Wert: {args.min_profit}[/red]")
-            sys.exit(1)
-    return db.get_opportunities(type_filter=type_filter, min_profit=min_profit)
-
-
-def build_npc_table(opps) -> Table:
-    table = _base_table()
-    table.add_column("Item", min_width=18, ratio=3)
-    table.add_column("Insta-Buy", no_wrap=True, ratio=2)
-    table.add_column("NPC-Preis", no_wrap=True, ratio=2)
-    table.add_column("Profit/Tag", justify="right", style="bold green", no_wrap=True, width=13)
-
-    for i, opp in enumerate(opps):
-        d = opp.details
-        row_style = "on grey7" if i % 2 == 0 else ""
-        table.add_row(
-            Text(opp.item_name, style="bold white"),
-            format_coins(d.get("bazaar_buy", 0)) + "/stk",
-            format_coins(d.get("effective_npc_price", d.get("npc_price", 0))) + "/stk",
-            format_coins(opp.profit) + "/Tag",
-            style=row_style,
-        )
-    return table
-
 
 def render(db, cfg, args) -> Panel:
-    all_opps = db.get_opportunities(min_profit=cfg.min_profit_display)
-    ah_opps = [o for o in all_opps if o.type == "AH"]
-    npc_opps = [o for o in all_opps if o.type == "NPC"]
+    opps = db.get_opportunities(type_filter="AH", min_profit=cfg.min_profit_display)
     now = datetime.now().strftime("%H:%M:%S")
 
-    if ah_opps:
-        ah_content = build_table(ah_opps)
+    if opps:
+        content = build_table(opps)
     else:
-        ah_content = Text("Keine AH-Opportunities — läuft der Daemon?  python3 daemon.py", style="dim")
-
-    ah_panel = Panel(ah_content, title="[bold]AH Flips[/bold]", border_style="bright_black")
-
-    if npc_opps:
-        npc_panel = Panel(build_npc_table(npc_opps), title="[bold]NPC Insta-Buy[/bold]", border_style="blue")
-    else:
-        npc_panel = Panel(Text("Keine NPC-Opportunities", style="dim"), title="[bold]NPC Insta-Buy[/bold]", border_style="blue")
-
-    content = Group(ah_panel, npc_panel)
+        content = Text("Keine AH-Opportunities — läuft der Daemon?  python3 daemon.py", style="dim")
 
     return Panel(
         content,
-        title="[bold]Skyblock Opportunities[/bold]",
+        title="[bold]AH Flips[/bold]",
         subtitle=f"[dim]Aktualisiert {now} · Strg+C zum Beenden[/dim]",
         border_style="bright_black",
     )
@@ -237,7 +194,7 @@ def main():
     sub = parser.add_subparsers(dest="command")
 
     show = sub.add_parser("show", help="Zeige aktuelle Opportunities")
-    show.add_argument("--type", choices=["bazaar", "npc", "ah"])
+    show.add_argument("--type", choices=["ah"])
     show.add_argument("--min-profit", help="Mindestprofit z.B. 500k oder 1m")
     show.add_argument("-w", "--watch", action="store_true", help="Live-Ansicht, alle 10s")
     show.set_defaults(type=None, min_profit=None, watch=False)
