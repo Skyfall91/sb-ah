@@ -29,20 +29,20 @@ def save_config(cfg: Config, path: str = DEFAULT_CONFIG_PATH) -> None:
 
 
 def setup_first_run(path: str = DEFAULT_CONFIG_PATH) -> Config:
-    print("=== Skyblock Investment Tool ===\n")
-    print("Kein API-Key gefunden. Du brauchst einen kostenlosen Hypixel API-Key:")
+    print("=== Skyblock AH Flipper ===\n")
+    print("No API key found. You need a free Hypixel API key:")
     print("  → https://developer.hypixel.net/dashboard\n")
-    print("1. Einloggen mit deinem Minecraft-Account")
-    print("2. 'Create API Key' klicken")
-    print("3. Key hier einfügen:\n")
+    print("1. Log in with your Minecraft account")
+    print("2. Click 'Create API Key'")
+    print("3. Paste it here:\n")
 
     while True:
         api_key = input("API Key: ").strip()
         if api_key:
             break
-        print("  Bitte einen Key eingeben.")
+        print("  Please enter a key.")
 
     cfg = Config(api_key=api_key)
     save_config(cfg, path)
-    print(f"\nGespeichert. Starte neu um fortzufahren.\n")
+    print(f"\nSaved. Restart to continue.\n")
     return cfg

@@ -89,8 +89,8 @@ python3 cli.py daemon stop
 | Column | Meaning |
 |--------|---------|
 | **Item** | Item name (clickable → Hypixel Wiki) |
-| **Kaufen** | Bundle quantity × price per unit |
-| **Einzeln** | Reference sell price per unit |
+| **Buy** | Bundle quantity × price per unit |
+| **Sell** | Reference sell price per unit |
 | **Bundles** | Number of profitable listings currently available |
 | **Profit/14** | Estimated profit buying and reselling 1 bundle per day for 14 days |
 

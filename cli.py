@@ -49,8 +49,8 @@ def _base_table() -> Table:
 def build_table(opps) -> Table:
     table = _base_table()
     table.add_column("Item", min_width=20, ratio=3)
-    table.add_column("Kaufen", no_wrap=True, ratio=2)
-    table.add_column("Einzeln", no_wrap=True, ratio=2)
+    table.add_column("Buy", no_wrap=True, ratio=2)
+    table.add_column("Sell", no_wrap=True, ratio=2)
     table.add_column("Bundles", justify="right", no_wrap=True, width=8)
     table.add_column("Profit/14", justify="right", style="bold green", no_wrap=True, width=12)
 
@@ -90,12 +90,12 @@ def render(db, cfg, args) -> Panel:
     if opps:
         content = build_table(opps)
     else:
-        content = Text("Keine AH-Opportunities — läuft der Daemon?  python3 daemon.py", style="dim")
+        content = Text("No AH opportunities — is the daemon running?  python3 daemon.py", style="dim")
 
     return Panel(
         content,
         title="[bold]AH Flips[/bold]",
-        subtitle=f"[dim]Aktualisiert {now} · Strg+C zum Beenden[/dim]",
+        subtitle=f"[dim]Updated {now} · Ctrl+C to quit[/dim]",
         border_style="bright_black",
     )
 
@@ -111,16 +111,16 @@ def cmd_top(args):
     hours = args.hours
     rows = db.get_top_sightings(hours=hours)
     if not rows:
-        console.print(f"[dim]Keine Daten für die letzten {hours}h — läuft der Daemon?[/dim]")
+        console.print(f"[dim]No data for the last {hours}h — is the daemon running?[/dim]")
         return
 
     table = _base_table()
     table.add_column("Item", min_width=20, ratio=3)
-    table.add_column("Gesehen", justify="right", no_wrap=True, width=10)
-    table.add_column("Zuverlässigkeit", no_wrap=True, ratio=2)
-    table.add_column("Ø Kaufen", justify="right", no_wrap=True, width=11)
-    table.add_column("Ø Verkaufen", justify="right", no_wrap=True, width=13)
-    table.add_column("Ø Profit/14", justify="right", style="bold green", no_wrap=True, width=13)
+    table.add_column("Seen", justify="right", no_wrap=True, width=10)
+    table.add_column("Reliability", no_wrap=True, ratio=2)
+    table.add_column("Avg Buy", justify="right", no_wrap=True, width=11)
+    table.add_column("Avg Sell", justify="right", no_wrap=True, width=13)
+    table.add_column("Avg Profit/14", justify="right", style="bold green", no_wrap=True, width=13)
 
     for i, r in enumerate(rows):
         name = _colored_name_text(r["item_name"], r["tier"])
@@ -147,8 +147,8 @@ def cmd_top(args):
 
     panel = Panel(
         table,
-        title=f"[bold]Top AH Flips — letzte {hours}h[/bold]",
-        subtitle=f"[dim]{rows[0]['rounds']} Checks · {len(rows)} Items[/dim]",
+        title=f"[bold]Top AH Flips — last {hours}h[/bold]",
+        subtitle=f"[dim]{rows[0]['rounds']} checks · {len(rows)} items[/dim]",
         border_style="bright_black",
     )
     console.print(panel)
@@ -167,30 +167,30 @@ def cmd_daemon(args):
         )
         with open(pid_path, "w") as f:
             f.write(str(proc.pid))
-        console.print(f"[green]Daemon gestartet (PID {proc.pid})[/green]")
+        console.print(f"[green]Daemon started (PID {proc.pid})[/green]")
     elif args.action == "stop":
         try:
             with open(pid_path) as f:
                 pid = int(f.read().strip())
             os.kill(pid, 15)
             os.unlink(pid_path)
-            console.print("[green]Daemon gestoppt[/green]")
+            console.print("[green]Daemon stopped[/green]")
         except FileNotFoundError:
-            console.print("[yellow]Keine daemon.pid — läuft der Daemon?[/yellow]")
+            console.print("[yellow]No daemon.pid found — is the daemon running?[/yellow]")
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="skyblock", description="Skyblock Investment Tool")
+    parser = argparse.ArgumentParser(prog="skyblock", description="Skyblock AH Flipper")
     sub = parser.add_subparsers(dest="command")
 
-    show = sub.add_parser("show", help="Zeige aktuelle Opportunities")
-    show.add_argument("--min-profit", help="Mindestprofit z.B. 500k oder 1m")
+    show = sub.add_parser("show", help="Show current opportunities")
+    show.add_argument("--min-profit", help="Minimum profit e.g. 500k or 1m")
     show.set_defaults(min_profit=None)
 
-    top_p = sub.add_parser("top", help="Persistente AH-Flips der letzten N Stunden")
-    top_p.add_argument("--hours", type=int, default=24, help="Zeitfenster in Stunden (default: 24)")
+    top_p = sub.add_parser("top", help="Top AH flips over the last N hours")
+    top_p.add_argument("--hours", type=int, default=24, help="Time window in hours (default: 24)")
 
-    daemon_p = sub.add_parser("daemon", help="Daemon steuern")
+    daemon_p = sub.add_parser("daemon", help="Control the daemon")
     daemon_p.add_argument("action", choices=["start", "stop"])
     sub.add_parser("setup")
 
