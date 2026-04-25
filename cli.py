@@ -192,6 +192,14 @@ def main():
 
     daemon_p = sub.add_parser("daemon", help="Control the daemon")
     daemon_p.add_argument("action", choices=["start", "stop"])
+
+    advice_p = sub.add_parser("advice", help="AI-powered personalized flip recommendations")
+    advice_p.add_argument("--full", action="store_true",
+                          help="Include inventory/enderchest/backpack value estimate (slower)")
+
+    wiki_p = sub.add_parser("wiki", help="Manage wiki knowledge base")
+    wiki_p.add_argument("action", choices=["update"], help="Crawl wiki and build search index")
+
     sub.add_parser("setup")
 
     args = parser.parse_args()
@@ -204,6 +212,18 @@ def main():
         cmd_top(args)
     elif args.command == "daemon":
         cmd_daemon(args)
+    elif args.command == "advice":
+        from config import load_config
+        import advisor
+        cfg = load_config()
+        advisor.run(cfg, full=args.full)
+    elif args.command == "wiki":
+        from sources import wiki, rag
+        print("Crawling wiki (this may take a few minutes)...")
+        chunks = wiki.crawl(verbose=True)
+        print("\nBuilding search index...")
+        rag.build_index(chunks, verbose=True)
+        print("\nDone. Run 'python3 cli.py advice' to get recommendations.")
     elif args.command == "setup":
         setup_first_run()
 

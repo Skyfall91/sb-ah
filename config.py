@@ -9,6 +9,8 @@ class Config:
     api_key: str = ""
     min_profit_notify: int = 500_000
     min_profit_display: int = 100_000
+    minecraft_username: str = ""
+    lm_studio_url: str = "http://localhost:1234"
 
 
 def load_config(path: str = DEFAULT_CONFIG_PATH) -> Config:
@@ -42,7 +44,10 @@ def setup_first_run(path: str = DEFAULT_CONFIG_PATH) -> Config:
             break
         print("  Please enter a key.")
 
-    cfg = Config(api_key=api_key)
+    print()
+    minecraft_username = input("Minecraft username (for the advisor feature, leave blank to skip): ").strip()
+
+    cfg = Config(api_key=api_key, minecraft_username=minecraft_username)
     save_config(cfg, path)
     print(f"\nSaved. Restart to continue.\n")
     return cfg

@@ -2,12 +2,13 @@
 
 Automatically finds profitable bundle flips in the Hypixel Skyblock Auction House.
 
-The tool detects listings where a bundle of items is cheaper per unit than singles — buy the bundle, sell individually for profit.
+The tool detects listings where a bundle of items is cheaper per unit than singles — buy the bundle, sell individually for profit. An optional AI advisor analyzes opportunities based on your wealth and Skyblock wiki knowledge.
 
 ## Requirements
 
 - Python 3.10+
 - Free Hypixel API key: https://developer.hypixel.net/dashboard
+- For the AI advisor: [LM Studio](https://lmstudio.ai) with `qwen3.6:35b-a3b` loaded
 
 ## Setup
 
@@ -18,7 +19,7 @@ pip3 install -r requirements.txt
 python3 cli.py setup
 ```
 
-During setup you'll be asked for your API key. It's stored locally in `config.yaml` and never uploaded.
+During setup you'll be asked for your Hypixel API key and Minecraft username. Both are stored locally in `config.yaml` and never uploaded.
 
 ## Usage
 
@@ -47,6 +48,27 @@ python3 cli.py --min-profit 1m
 ```bash
 python3 cli.py daemon stop
 ```
+
+## AI Advisor
+
+The advisor combines your current wealth, live opportunities, and wiki knowledge to give personalized recommendations.
+
+**One-time setup** — crawl the wiki and build the search index (~5 min):
+```bash
+python3 cli.py wiki update
+```
+
+**Get recommendations** (based on bank + purse):
+```bash
+python3 cli.py advice
+```
+
+**Include full wealth estimate** (inventory, enderchest, backpacks):
+```bash
+python3 cli.py advice --full
+```
+
+Requires LM Studio running locally with `qwen3.6:35b-a3b` loaded. Default URL: `http://localhost:1234`.
 
 ## Reading the output
 
