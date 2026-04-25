@@ -22,3 +22,6 @@ __pycache__/
 
 # App bundle (built artifact)
 Skyblock.app/
+
+# Superpowers internal files
+.superpowers/
