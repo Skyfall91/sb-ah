@@ -1,64 +1,43 @@
-# Skyblock AH Flipper
+# Skyblock AH Flipper — AI Advisor
 
-Automatically finds profitable bundle flips in the Hypixel Skyblock Auction House.
+AI-powered flip recommendations for the Hypixel Skyblock Auction House. The advisor knows your current wealth, live opportunities, and has deep Skyblock knowledge from the wiki.
 
-The tool detects listings where a bundle of items is cheaper per unit than singles — buy the bundle, sell individually for profit. An optional AI advisor analyzes opportunities based on your wealth and Skyblock wiki knowledge.
+## How it works
+
+1. The **daemon** fetches live AH data every 60 seconds
+2. **`wiki update`** crawls the Hypixel Skyblock wiki and builds a local search index
+3. **`advice`** combines your player wealth, current opportunities, and relevant wiki knowledge into a prompt for a local AI model — which then gives you personalized, prioritized recommendations
 
 ## Requirements
 
 - Python 3.10+
-- Free Hypixel API key: https://developer.hypixel.net/dashboard
-- For the AI advisor: [LM Studio](https://lmstudio.ai) with `qwen3.6:35b-a3b` loaded
+- Hypixel API key (free): https://developer.hypixel.net/dashboard
+- [LM Studio](https://lmstudio.ai) with `mlx-community/Qwen3.5-9B-MLX-4bit` loaded and Local Server running
 
 ## Setup
 
 ```bash
-git clone https://github.com/Skyfall91/sb-ah.git
+git clone -b ai-advisor https://github.com/Skyfall91/sb-ah.git
 cd sb-ah
 pip3 install -r requirements.txt
 python3 cli.py setup
 ```
 
-During setup you'll be asked for your Hypixel API key and Minecraft username. Both are stored locally in `config.yaml` and never uploaded.
+During setup you'll be asked for your Hypixel API key and Minecraft username.
 
-## Usage
-
-**Start the daemon** — fetches new auction data every 60 seconds:
-```bash
-python3 cli.py daemon start
-```
-
-**Show current flips:**
-```bash
-python3 cli.py
-```
-
-**Top flips over the last 24h** (more reliable, based on repeated sightings):
-```bash
-python3 cli.py top
-python3 cli.py top --hours 6
-```
-
-**Filter by minimum profit:**
-```bash
-python3 cli.py --min-profit 1m
-```
-
-**Stop the daemon:**
-```bash
-python3 cli.py daemon stop
-```
-
-## AI Advisor
-
-The advisor combines your current wealth, live opportunities, and wiki knowledge to give personalized recommendations.
-
-**One-time setup** — crawl the wiki and build the search index (~5 min):
+**Build the wiki index** (once, takes ~5 minutes):
 ```bash
 python3 cli.py wiki update
 ```
 
-**Get recommendations** (based on bank + purse):
+## Getting recommendations
+
+**Start the daemon** so there's live data to analyze:
+```bash
+python3 cli.py daemon start
+```
+
+**Get AI recommendations** based on your bank + purse:
 ```bash
 python3 cli.py advice
 ```
@@ -68,15 +47,23 @@ python3 cli.py advice
 python3 cli.py advice --full
 ```
 
-Requires LM Studio running locally with `qwen3.6:35b-a3b` loaded. Default URL: `http://localhost:1234`.
+The advisor will:
+- Fetch your current coin balance from the Hypixel API
+- Retrieve relevant wiki knowledge for the items in the current opportunities
+- Always include core mechanics (AH fees, mayor effects, etc.) as context
+- Ask the local AI model which flips are best for your budget right now
 
-## Reading the output
+## Other commands
 
-| Column | Meaning |
-|--------|---------|
-| **Buy** | Bundle price per unit |
-| **Sell** | Reference sell price (AH average, Bazaar, or NPC) |
-| **Bundles** | Number of profitable listings currently available |
-| **Profit/14** | Profit if you fill all 14 AH slots with singles from one bundle |
+```bash
+python3 cli.py              # show current opportunities
+python3 cli.py top          # top flips of the last 24h
+python3 cli.py daemon stop  # stop the daemon
+```
 
-Price badges: `BZ` = Bazaar floor · `NPC` = NPC price · `~` = possible manipulation · `⚠` = suspicious price
+## LM Studio setup
+
+1. Download [LM Studio](https://lmstudio.ai)
+2. Search for `Qwen3.5-9B-MLX-4bit` and download it (~5.6 GB, fits on 16 GB RAM)
+3. Go to **Local Server** and click **Start Server**
+4. Default URL `http://localhost:1234` is used automatically — no config needed
