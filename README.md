@@ -24,11 +24,6 @@ python3 cli.py daemon start
 python3 cli.py
 ```
 
-**Live-Ansicht** (aktualisiert alle 10s):
-```bash
-python3 cli.py -w
-```
-
 **Top-Flips der letzten 24h:**
 ```bash
 python3 cli.py top

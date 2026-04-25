@@ -1,11 +1,9 @@
 import argparse
 import os
 import sys
-import time
 from datetime import datetime
 
 from rich.console import Console
-from rich.live import Live
 from rich.text import Text
 from rich.panel import Panel
 from rich.table import Table
@@ -105,15 +103,7 @@ def render(db, cfg, args) -> Panel:
 def cmd_show(args):
     cfg = load_config()
     db = DB()
-
-    if args.watch:
-        with Live(auto_refresh=False, screen=False) as live:
-            while True:
-                live.update(render(db, cfg, args))
-                live.refresh()
-                time.sleep(10)
-    else:
-        console.print(render(db, cfg, args))
+    console.print(render(db, cfg, args))
 
 
 def cmd_top(args):
@@ -194,10 +184,8 @@ def main():
     sub = parser.add_subparsers(dest="command")
 
     show = sub.add_parser("show", help="Zeige aktuelle Opportunities")
-    show.add_argument("--type", choices=["ah"])
     show.add_argument("--min-profit", help="Mindestprofit z.B. 500k oder 1m")
-    show.add_argument("-w", "--watch", action="store_true", help="Live-Ansicht, alle 10s")
-    show.set_defaults(type=None, min_profit=None, watch=False)
+    show.set_defaults(min_profit=None)
 
     top_p = sub.add_parser("top", help="Persistente AH-Flips der letzten N Stunden")
     top_p.add_argument("--hours", type=int, default=24, help="Zeitfenster in Stunden (default: 24)")
@@ -210,9 +198,7 @@ def main():
 
     if args.command == "show" or args.command is None:
         if args.command is None:
-            args.type = None
             args.min_profit = None
-            args.watch = False
         cmd_show(args)
     elif args.command == "top":
         cmd_top(args)
