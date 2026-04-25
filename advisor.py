@@ -2,6 +2,7 @@
 from __future__ import annotations
 import asyncio
 import os
+import time
 from openai import OpenAI
 
 from config import Config
@@ -136,12 +137,26 @@ def run(cfg: Config, full: bool = False) -> None:
         print("No Minecraft username set. Run: python3 cli.py setup")
         return
 
-    if not rag.index_exists():
-        print("[warn] Wiki index not built — advisor will use core mechanics only.")
-        print("       Run 'python3 cli.py wiki update' for full wiki knowledge.\n")
-        wiki_chunks = []
-    else:
+    from sources import wiki
+
+    if wiki.is_stale():
+        if rag.index_exists():
+            age_days = int((time.time() - os.path.getmtime(wiki.CACHE_PATH)) / 86400)
+            print(f"Wiki index is {age_days}d old — updating automatically...")
+        else:
+            print("Wiki index not found — building it now (takes a few minutes)...")
+        try:
+            chunks = wiki.crawl(verbose=False)
+            print(f"  Crawled {len(chunks)} chunks, rebuilding index...")
+            rag.build_index(chunks, verbose=False)
+            print("  Wiki updated.\n")
+        except Exception as e:
+            print(f"  [warn] Wiki auto-update failed: {e}\n")
+
+    if rag.index_exists():
         print("Retrieving relevant wiki context...")
+    else:
+        print("[warn] No wiki index available — using core mechanics only.\n")
 
     db = DB()
     opportunities = db.get_opportunities(type_filter="AH", min_profit=0)

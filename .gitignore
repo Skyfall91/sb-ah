@@ -12,6 +12,10 @@ skyblock.db
 .icon_cache/
 .moulberry_lbin.json
 
+# Generated wiki data (rebuilt automatically by the advisor)
+data/wiki_chunks.json
+data/chroma_db/
+
 # macOS
 .DS_Store
 

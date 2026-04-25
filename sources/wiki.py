@@ -3,10 +3,15 @@ from __future__ import annotations
 import json
 import os
 import re
+import ssl
 import time
 import urllib.request
 import urllib.parse
 from typing import Iterator
+
+import certifi
+
+_SSL_CTX = ssl.create_default_context(cafile=certifi.where())
 
 WIKI_API = "https://hypixelskyblock.minecraft.wiki/api.php"
 CACHE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "wiki_chunks.json")
@@ -19,12 +24,13 @@ CRAWL_CATEGORIES = [
     "Accessories",
     "Pets",
     "Enchantments",
-    "Bazaar",
-    "Auction House",
-    "Mayors",
+    "Mayor",
     "Dungeons",
     "Skills",
 ]
+
+# Pages with no category membership but important for the advisor
+EXTRA_PAGES = ["Bazaar", "Auction House"]
 
 MAX_PAGES_PER_CATEGORY = 150
 CHUNK_SIZE = 600  # words per chunk
@@ -34,7 +40,8 @@ CHUNK_OVERLAP = 60
 def _api_get(params: dict) -> dict:
     params["format"] = "json"
     url = WIKI_API + "?" + urllib.parse.urlencode(params)
-    with urllib.request.urlopen(url, timeout=15) as r:
+    req = urllib.request.Request(url, headers={"User-Agent": "sb-ah-flipper/1.0"})
+    with urllib.request.urlopen(req, timeout=15, context=_SSL_CTX) as r:
         return json.loads(r.read())
 
 
@@ -109,6 +116,17 @@ def crawl(verbose: bool = True) -> list[dict]:
         if verbose:
             print(f"    {len(seen_titles)} pages so far, {len(all_chunks)} chunks")
 
+    for title in EXTRA_PAGES:
+        if title in seen_titles:
+            continue
+        seen_titles.add(title)
+        try:
+            text = _fetch_page_text(title)
+            if len(text.split()) >= 30:
+                all_chunks.extend(_chunk_text(title, text))
+        except Exception as e:
+            print(f"  [warn] Could not fetch '{title}': {e}")
+
     os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
     with open(CACHE_PATH, "w") as f:
         json.dump(all_chunks, f)
@@ -123,3 +141,11 @@ def load_chunks() -> list[dict]:
         raise FileNotFoundError("Wiki not crawled yet. Run: python3 cli.py wiki update")
     with open(CACHE_PATH) as f:
         return json.load(f)
+
+
+def is_stale(max_age_days: int = 3) -> bool:
+    """Returns True if the wiki cache is missing or older than max_age_days."""
+    if not os.path.exists(CACHE_PATH):
+        return True
+    age_seconds = time.time() - os.path.getmtime(CACHE_PATH)
+    return age_seconds > max_age_days * 86400
