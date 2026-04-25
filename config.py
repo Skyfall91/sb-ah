@@ -7,7 +7,6 @@ DEFAULT_CONFIG_PATH = "config.yaml"
 @dataclass
 class Config:
     api_key: str = ""
-    min_profit_notify: int = 500_000
     min_profit_display: int = 100_000
     minecraft_username: str = ""
     lm_studio_url: str = "http://localhost:1234"

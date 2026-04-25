@@ -43,7 +43,6 @@ async def run_auction_loop(cfg, db: DB, hypixel: HypixelClient):
             db.clear_opportunities_older_than_minutes(10, type_filter="AH")
             for opp in ah_opps:
                 db.save_opportunity(opp)
-            db.record_sightings(ah_opps)
             lbin_hits = sum(1 for o in ah_opps if o.details.get("has_lbin"))
             log.info(f"AH: {len(ah_opps)} opportunities ({lbin_hits} with LBIN, {len(avg_lbin)} prices loaded, mayor: {mayor})")
         except Exception as e:

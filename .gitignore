@@ -4,8 +4,9 @@ config.yaml
 # Database
 skyblock.db
 
-# Logs
+# Logs and runtime files
 *.log
+daemon.pid
 
 # Caches
 .neu_cache/
@@ -15,6 +16,9 @@ skyblock.db
 # Generated wiki data (rebuilt automatically by the advisor)
 data/wiki_chunks.json
 data/chroma_db/
+
+# Claude Code local settings
+.claude/settings.json
 
 # macOS
 .DS_Store
