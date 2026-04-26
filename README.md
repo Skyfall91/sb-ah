@@ -11,7 +11,15 @@ AI-powered flip recommendations for the Hypixel Skyblock Auction House. The advi
 ## LM Studio setup
 
 1. Download [LM Studio](https://lmstudio.ai)
-2. Search for `Qwen3.5-9B-MLX-4bit` and download it (~5.6 GB, fits on 16 GB RAM)
+2. Download a model depending on your RAM:
+
+   | RAM | Modell |
+   |-----|--------|
+   | 8 GB | `mlx-community/Qwen3-4B-4bit` |
+   | 16 GB | `mlx-community/Qwen3.5-9B-MLX-4bit` |
+   | 32 GB | `unsloth/Qwen3.6-27B-UD-MLX-4bit` |
+   | 64 GB | `unsloth/Qwen3.6-35B-A3B-UD-MLX-4bit` |
+
 3. Load the model and set **Context Length to at least 8192** (recommended: 24576) — the default is too small and will cause an error
 4. Go to **Local Server** and click **Start Server**
 5. Default URL `http://localhost:1234` is used automatically — to change it: `python3 cli.py config lm_studio_url <url>`
