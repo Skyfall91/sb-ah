@@ -1,3 +1,4 @@
 api_key: YOUR_HYPIXEL_API_KEY
 min_profit_display: 100000
 min_profit_notify: 500000
+lm_studio_url: http://localhost:1234

@@ -1,13 +1,18 @@
-# Skyblock AH Flipper
+# Skyblock AH Flipper — AI Advisor
 
-Automatically finds profitable bundle flips in the Hypixel Skyblock Auction House.
+AI-powered flip recommendations for the Hypixel Skyblock Auction House. The advisor knows your current wealth, live opportunities, and has deep Skyblock knowledge from the wiki.
 
-The tool detects listings where a bundle of items is cheaper per unit than singles — buy the bundle, sell individually for profit.
+## How it works
+
+1. The **daemon** fetches live AH data every 60 seconds
+2. **`wiki update`** crawls the Hypixel Skyblock wiki and builds a local search index
+3. **`advice`** combines your player wealth, current opportunities, and relevant wiki knowledge into a prompt for a local AI model — which then gives you personalized, prioritized recommendations
 
 ## Requirements
 
 - Python 3.10+
-- Free Hypixel API key: https://developer.hypixel.net/dashboard
+- Hypixel API key (free): https://developer.hypixel.net/dashboard
+- [LM Studio](https://lmstudio.ai) with `mlx-community/Qwen3.5-9B-MLX-4bit` loaded and Local Server running
 
 ## Setup
 
@@ -18,43 +23,50 @@ pip3 install -r requirements.txt
 python3 cli.py setup
 ```
 
-During setup you'll be asked for your API key. It's stored locally in `config.yaml` and never uploaded.
+During setup you'll be asked for your Hypixel API key and Minecraft username.
 
-## Usage
+**Build the wiki index** (once, takes ~5 minutes):
+```bash
+python3 cli.py wiki update
+```
 
-**Start the daemon** — fetches new auction data every 60 seconds:
+## Getting recommendations
+
+**Start the daemon** so there's live data to analyze:
 ```bash
 python3 cli.py daemon start
 ```
 
-**Show current flips:**
+**Get AI recommendations** based on your bank + purse:
 ```bash
-python3 cli.py
+python3 cli.py advice
 ```
 
-**Top flips over the last 24h** (more reliable, based on repeated sightings):
+**Include full wealth estimate** (inventory, enderchest, backpacks):
 ```bash
-python3 cli.py top
-python3 cli.py top --hours 6
+python3 cli.py advice --full
 ```
 
-**Filter by minimum profit:**
+The advisor will:
+- Fetch your current coin balance from the Hypixel API
+- Retrieve relevant wiki knowledge for the items in the current opportunities
+- Always include core mechanics (AH fees, mayor effects, etc.) as context
+- Ask the local AI model which flips are best for your budget right now
+
+## Other commands
+
 ```bash
-python3 cli.py --min-profit 1m
+python3 cli.py              # show current opportunities
+python3 cli.py top          # top flips of the last 24h
+python3 cli.py daemon stop  # stop the daemon
+python3 cli.py config       # show all settings
+python3 cli.py config lm_studio_url http://192.168.1.50:1234  # change AI URL
 ```
 
-**Stop the daemon:**
-```bash
-python3 cli.py daemon stop
-```
+## LM Studio setup
 
-## Reading the output
-
-| Column | Meaning |
-|--------|---------|
-| **Buy** | Bundle price per unit |
-| **Sell** | Reference sell price (AH average, Bazaar, or NPC) |
-| **Bundles** | Number of profitable listings currently available |
-| **Profit/14** | Profit if you fill all 14 AH slots with singles from one bundle |
-
-Price badges: `BZ` = Bazaar floor · `NPC` = NPC price · `~` = possible manipulation · `⚠` = suspicious price
+1. Download [LM Studio](https://lmstudio.ai)
+2. Search for `Qwen3.5-9B-MLX-4bit` and download it (~5.6 GB, fits on 16 GB RAM)
+3. Load the model and set **Context Length to at least 8192** (recommended: 24576) — the default is too small and will cause an error
+4. Go to **Local Server** and click **Start Server**
+5. Default URL `http://localhost:1234` is used automatically — to change it: `python3 cli.py config lm_studio_url <url>`

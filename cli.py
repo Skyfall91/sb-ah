@@ -154,6 +154,31 @@ def cmd_top(args):
     console.print(panel)
 
 
+def cmd_config(args):
+    import dataclasses
+    from config import load_config, save_config
+    cfg = load_config()
+    if args.key is None:
+        for k, v in dataclasses.asdict(cfg).items():
+            console.print(f"[bold]{k}[/bold] = {v}")
+        return
+    if not hasattr(cfg, args.key):
+        console.print(f"[red]Unknown setting: {args.key}[/red]")
+        console.print(f"[dim]Valid: {', '.join(dataclasses.asdict(cfg).keys())}[/dim]")
+        return
+    if args.value is None:
+        console.print(f"[bold]{args.key}[/bold] = {getattr(cfg, args.key)}")
+        return
+    field_type = type(getattr(cfg, args.key))
+    try:
+        setattr(cfg, args.key, field_type(args.value))
+    except (ValueError, TypeError):
+        console.print(f"[red]Invalid value for {args.key}: {args.value!r}[/red]")
+        return
+    save_config(cfg)
+    console.print(f"[green]Saved:[/green] {args.key} = {getattr(cfg, args.key)}")
+
+
 def cmd_daemon(args):
     import subprocess
     here = os.path.dirname(__file__)
@@ -192,6 +217,18 @@ def main():
 
     daemon_p = sub.add_parser("daemon", help="Control the daemon")
     daemon_p.add_argument("action", choices=["start", "stop"])
+
+    advice_p = sub.add_parser("advice", help="AI-powered personalized flip recommendations")
+    advice_p.add_argument("--full", action="store_true",
+                          help="Include inventory/enderchest/backpack value estimate (slower)")
+
+    wiki_p = sub.add_parser("wiki", help="Manage wiki knowledge base")
+    wiki_p.add_argument("action", choices=["update"], help="Crawl wiki and build search index")
+
+    config_p = sub.add_parser("config", help="View or change settings")
+    config_p.add_argument("key", nargs="?", help="Setting name (e.g. lm_studio_url)")
+    config_p.add_argument("value", nargs="?", help="New value (omit to read current)")
+
     sub.add_parser("setup")
 
     args = parser.parse_args()
@@ -204,6 +241,20 @@ def main():
         cmd_top(args)
     elif args.command == "daemon":
         cmd_daemon(args)
+    elif args.command == "advice":
+        from config import load_config
+        import advisor
+        cfg = load_config()
+        advisor.run(cfg, full=args.full)
+    elif args.command == "wiki":
+        from sources import wiki, rag
+        print("Crawling wiki (this may take a few minutes)...")
+        chunks = wiki.crawl(verbose=True)
+        print("\nBuilding search index...")
+        rag.build_index(chunks, verbose=True)
+        print("\nDone. Run 'python3 cli.py advice' to get recommendations.")
+    elif args.command == "config":
+        cmd_config(args)
     elif args.command == "setup":
         setup_first_run()
 
