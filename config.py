@@ -47,7 +47,12 @@ def setup_first_run(path: str = DEFAULT_CONFIG_PATH) -> Config:
     print()
     minecraft_username = input("Minecraft username (for the advisor feature, leave blank to skip): ").strip()
 
-    cfg = Config(api_key=api_key, minecraft_username=minecraft_username)
+    print()
+    lm_studio_url = input(f"LM Studio URL (leave blank for default {Config.__dataclass_fields__['lm_studio_url'].default}): ").strip()
+    if not lm_studio_url:
+        lm_studio_url = Config.__dataclass_fields__["lm_studio_url"].default
+
+    cfg = Config(api_key=api_key, minecraft_username=minecraft_username, lm_studio_url=lm_studio_url)
     save_config(cfg, path)
     print(f"\nSaved. Restart to continue.\n")
     return cfg
