@@ -120,9 +120,9 @@ Player wealth:
 {chr(10).join(wealth_lines)}
 
 Current AH opportunities (sorted by profit/14 slots):
-{chr(10).join(opp_lines) if opp_lines else "No opportunities — daemon not running."}
+{chr(10).join(opp_lines) if opp_lines else "No opportunities available."}
 
-Task: If opportunities exist, name the top 3 flips to prioritize given the player's liquid coins. For each: item, how many bundles to buy, why. Flag anything manipulated or suspicious. If no opportunities, say so in one sentence and suggest starting the daemon."""
+Task: List the top 3 flips to prioritize given the player's liquid coins. Use a numbered list — one flip per line: item name, how many bundles to buy, expected profit per 14 slots. Before the list, name any skipped items and why (manipulation/suspicious) in one line. If no opportunities are available, say so in one sentence."""
 
 
 def run(cfg: Config, full: bool = False) -> None:
