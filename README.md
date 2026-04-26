@@ -17,7 +17,7 @@ AI-powered flip recommendations for the Hypixel Skyblock Auction House. The advi
 ## Setup
 
 ```bash
-git clone -b ai-advisor https://github.com/Skyfall91/sb-ah.git
+git clone https://github.com/Skyfall91/sb-ah.git
 cd sb-ah
 pip3 install -r requirements.txt
 python3 cli.py setup
@@ -59,6 +59,8 @@ The advisor will:
 python3 cli.py              # show current opportunities
 python3 cli.py top          # top flips of the last 24h
 python3 cli.py daemon stop  # stop the daemon
+python3 cli.py config       # show all settings
+python3 cli.py config lm_studio_url http://192.168.1.50:1234  # change AI URL
 ```
 
 ## LM Studio setup
@@ -67,4 +69,4 @@ python3 cli.py daemon stop  # stop the daemon
 2. Search for `Qwen3.5-9B-MLX-4bit` and download it (~5.6 GB, fits on 16 GB RAM)
 3. Load the model and set **Context Length to at least 8192** (recommended: 24576) — the default is too small and will cause an error
 4. Go to **Local Server** and click **Start Server**
-5. Default URL `http://localhost:1234` is used automatically — no config needed
+5. Default URL `http://localhost:1234` is used automatically — to change it: `python3 cli.py config lm_studio_url <url>`
