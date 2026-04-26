@@ -22,7 +22,6 @@ AI-powered flip recommendations for the Hypixel Skyblock Auction House. The advi
 
 3. Load the model and set **Context Length to at least 8192** (recommended: 24576) — the default is too small and will cause an error
 4. Go to **Local Server** and click **Start Server**
-5. Default URL `http://localhost:1234` is used automatically — to change it: `python3 cli.py config lm_studio_url <url>`
 
 ## Setup
 
