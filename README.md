@@ -11,7 +11,7 @@ AI-powered flip recommendations for the Hypixel Skyblock Auction House. The advi
 ## LM Studio setup
 
 1. Download [LM Studio](https://lmstudio.ai)
-2. Download a model depending on your RAM:
+2. Download a model depending on your RAM (these are examples — any instruction-tuned model works):
 
    | RAM | Modell |
    |-----|--------|
